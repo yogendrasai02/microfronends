@@ -1,0 +1,34 @@
+name: deploy-container # name of workflow
+
+# designate when to run workflow - what events?
+on: 
+  push:
+    branches:
+      - main
+    paths:
+      # run the workflow when something changes in the container
+      - 'packages/container/**'
+
+# set working directory for the VM
+defaults:
+  run:
+    # set execution environment to the container directory
+    working-directory: packages/container
+
+jobs:
+  # all jobs run in parallel
+  build:
+    runs-on: ubuntu-latest # for the VM
+
+    # commands to execute
+    steps:
+      - uses: actions/checkout@v2 # first, checkout the code from the project, and load into the VM
+      - run: npm install # install dependencies
+      - run: npm run build # webpack prod build
+
+    # AWS config using AWS CLI
+      - uses: chrislenon/action-aws-cli@v1.2
+      - run: aws s3 sync dist s3://${{ secrets.AWS_S3_BUCKET_NAME }}/container/latest # to synchronize the dist folder to S3
+        env:
+            AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
