@@ -1,0 +1,43 @@
+name: deploy-marketing # name of workflow
+
+# designate when to run workflow - what events?
+on: 
+  push:
+    branches:
+      - main
+    paths:
+      # run the workflow when something changes in the marketing
+      - 'packages/marketing/**'
+
+# set working directory for the VM
+defaults:
+  run:
+    # set execution environment to the marketing directory
+    working-directory: packages/marketing
+
+jobs:
+  # all jobs run in parallel
+  build:
+    runs-on: ubuntu-latest # for the VM
+
+    # commands to execute
+    steps:
+      - uses: actions/checkout@v2 # first, checkout the code from the project, and load into the VM
+      - run: npm install # install dependencies
+      - run: npm run build # webpack prod build
+
+      # ***** AWS config using AWS CLI *****
+
+      # sync S3 with dist folder
+      - uses: shinyinc/action-aws-cli@v1.2
+      - run: aws s3 sync dist s3://${{ secrets.AWS_S3_BUCKET_NAME }}/marketing/latest # to synchronize the dist folder to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: eu-north-1
+
+      - run: aws cloudfront create-invalidation --distribution-id ${{ secrets.AWS_DISTRIBUTION_ID }} --paths "/marketing/latest/remoteEntry.js"
+        env: 
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: eu-north-1
