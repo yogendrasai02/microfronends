@@ -5,6 +5,7 @@ import Pricing from "./components/Pricing";
 import Landing from "./components/Landing";
 
 export default function App() {
+  console.log('Marketing');
   return (
     <div>
       <StylesProvider>
