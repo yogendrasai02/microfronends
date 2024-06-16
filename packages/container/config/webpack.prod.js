@@ -19,7 +19,8 @@ const domain = process.env.PRODUCTION_DOMAIN; // we will set up this env var usi
 const prodConfig = {
   mode: 'production', // webpack optimises & minifies JS files
   output: {
-    filename: '[name].[contenthash].js' // when we build, the file names will follow this template, also deals with caching issues
+    filename: '[name].[contenthash].js', // when we build, the file names will follow this template, also deals with caching issues
+    publicPath: '/container/latest' // check S3 folder structure
   },
   plugins: [
     new ModuleFederationPlugin({
