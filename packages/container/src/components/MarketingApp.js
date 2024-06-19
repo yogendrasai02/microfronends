@@ -1,13 +1,29 @@
 import React, { useRef, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import { mount } from 'marketing/MarketingApp';
 
 export default function MarketingApp() {
   const ref = useRef(null);
 
+  const history = useHistory();
+
   // provide this element reference to the mount function
   // call the mount function only for the first component render
   useEffect(() => {
-    mount(ref.current);
+    const { onParentNavigate } = mount(ref.current, {
+      onNavigate: (location) => {
+        // console.log('Container noted navigation in marketing app');
+        // console.log(location);
+        const { pathname: nextPathname } = location;
+        const { pathname: currentPathname } = history.location;
+        if(currentPathname !== nextPathname) {
+          history.push(nextPathname);
+        }
+      }
+    });
+
+    history.listen(onParentNavigate);
+
     // renders the marketing app into the below div, whose reference we provide as input
   }, []);
 
