@@ -11,6 +11,7 @@ export default function MarketingApp() {
   // call the mount function only for the first component render
   useEffect(() => {
     const { onParentNavigate } = mount(ref.current, {
+      initialPath: history.location.pathname,
       onNavigate: (location) => {
         // console.log('Container noted navigation in marketing app');
         // console.log(location);
