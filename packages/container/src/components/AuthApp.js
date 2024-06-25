@@ -20,6 +20,9 @@ export default function AuthApp() {
         if(currentPathname !== nextPathname) {
           history.push(nextPathname);
         }
+      },
+      onSignIn: () => {
+        console.log('Auth Change');
       }
     });
 
